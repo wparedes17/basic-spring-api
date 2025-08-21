@@ -1,0 +1,64 @@
+# Test-specific configuration for Spring Boot application
+# This configuration overrides application.yml during test execution
+
+server:
+  port: 0  # Use random available port for tests to avoid conflicts
+
+spring:
+  application:
+    name: testing-app-test
+  
+  # Test profile specific configurations
+  profiles:
+    active: test
+  
+  # Disable banner for cleaner test output
+  main:
+    banner-mode: off
+    
+  # Test database configuration (if using database in future)
+  datasource:
+    # Using H2 in-memory database for tests
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  # JPA configuration for tests
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    
+  # H2 Console for debugging tests (disabled by default)
+  h2:
+    console:
+      enabled: false
+
+# Logging configuration for tests
+logging:
+  level:
+    root: WARN
+    com.company..testingapp: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Management endpoints configuration for tests
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+# Test-specific properties
+app:
+  test:
+    mock-external-services: true
+    enable-test-data: true
+    cleanup-after-test: true

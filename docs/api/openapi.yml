@@ -1,0 +1,221 @@
+openapi: 3.0.3
+info:
+  title: Testing App API
+  description: |
+    A Spring Boot REST API providing health check functionality.
+    
+    ## Features
+    - Health status monitoring
+    - System information reporting
+    - JSON response format
+    
+    ## Getting Started
+    The API provides a simple health check endpoint to monitor the application status.
+  version: 1.0.0
+  contact:
+    name: Testing App Team
+    email: support@testingapp.com
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api-dev.testingapp.com
+    description: Development environment
+  - url: https://api-staging.testingapp.com
+    description: Staging environment
+  - url: https://api.testingapp.com
+    description: Production environment
+
+tags:
+  - name: health
+    description: Health check operations
+    externalDocs:
+      description: Health check best practices
+      url: https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html
+
+paths:
+  /api/v1/health:
+    get:
+      tags:
+        - health
+      summary: Check application health status
+      description: |
+        Returns the current health status of the application including:
+        - Overall status (UP/DOWN)
+        - Timestamp of the check
+        - Application version information
+        - System uptime
+        
+        This endpoint is commonly used by:
+        - Load balancers for health checks
+        - Monitoring systems
+        - Container orchestration platforms
+      operationId: getHealthStatus
+      responses:
+        '200':
+          description: Health check successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  summary: Healthy application
+                  value:
+                    status: "UP"
+                    timestamp: "2025-08-18T10:30:00Z"
+                    version: "1.0.0"
+                    uptime: "2h 30m 45s"
+                    details:
+                      database: "UP"
+                      diskSpace: "UP"
+                      memory: "UP"
+        '503':
+          description: Service unavailable - application is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                unhealthy:
+                  summary: Unhealthy application
+                  value:
+                    status: "DOWN"
+                    timestamp: "2025-08-18T10:30:00Z"
+                    version: "1.0.0"
+                    uptime: "2h 30m 45s"
+                    details:
+                      database: "DOWN"
+                      diskSpace: "UP"
+                      memory: "UP"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN, OUT_OF_SERVICE, UNKNOWN]
+          description: Overall health status of the application
+          example: "UP"
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the health check was performed
+          example: "2025-08-18T10:30:00Z"
+        version:
+          type: string
+          description: Current application version
+          example: "1.0.0"
+        uptime:
+          type: string
+          description: Human-readable application uptime
+          example: "2h 30m 45s"
+        details:
+          type: object
+          description: Detailed health information for various components
+          additionalProperties:
+            type: string
+            enum: [UP, DOWN, OUT_OF_SERVICE, UNKNOWN]
+          example:
+            database: "UP"
+            diskSpace: "UP"
+            memory: "UP"
+
+    ErrorResponse:
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the error occurred
+          example: "2025-08-18T10:30:00Z"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 500
+        error:
+          type: string
+          description: Error type
+          example: "Internal Server Error"
+        message:
+          type: string
+          description: Detailed error message
+          example: "An unexpected error occurred while processing the request"
+        path:
+          type: string
+          description: Request path that caused the error
+          example: "/api/v1/health"
+        traceId:
+          type: string
+          description: Unique identifier for request tracing
+          example: "a1b2c3d4e5f6"
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid input parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  parameters:
+    AcceptHeader:
+      name: Accept
+      in: header
+      description: Media type(s) that the client accepts
+      required: false
+      schema:
+        type: string
+        default: application/json
+        enum:
+          - application/json
+          - application/xml
+
+  # Security schemes (if needed in future)
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication
+
+# Global security (commented out for now since health endpoint is typically public)
+# security:
+#   - ApiKeyAuth: []
+#   - BearerAuth: []
+
+externalDocs:
+  description: Spring Boot Documentation
+  url: https://spring.io/projects/spring-boot

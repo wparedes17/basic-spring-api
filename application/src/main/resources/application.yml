@@ -1,0 +1,76 @@
+# Spring Boot Application Configuration
+# File: src/main/resources/application.yml
+
+spring:
+  application:
+    name: testing-app
+
+  # Profile configuration
+  profiles:
+    active: dev
+
+  # Jackson JSON configuration
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  shutdown: graceful
+
+  # Error handling
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+
+# Management endpoints (Actuator)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+# Application info
+info:
+  app:
+    name: ${spring.application.name}
+    description: RESTful API with Spring Boot and Java 21
+    version: 1.0.0
+    encoding: UTF-8
+    java:
+      version: 21
+
+# Logging configuration
+logging:
+  level:
+    com.yourcompany.testingapp: INFO
+    org.springframework: WARN
+    org.apache: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/testing-app.log
+
+# Spring Boot configuration
+springdoc:
+  api-docs:
+    path: /docs/api/
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
